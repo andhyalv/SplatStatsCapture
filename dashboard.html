@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Dashboard</title>
+    <script>
+        // Function to send AJAX request and update the status dynamically
+        function sendRequest(action, station) {
+            fetch(`http://${station}:5000/${action}`, {
+                method: 'POST',
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Update the status on the dashboard
+                    document.getElementById(`${station}-status`).innerText = action === 'start' ? 'Running' : 'Idle';
+                } else {
+                    alert('Error: Unable to send request');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: Failed to send request');
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Pi Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Station</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for station, ip in pis.items() %}
+            <tr>
+                <td>{{ station }}</td>
+                <td id="{{ ip }}-status">{{ statuses.get(station, '❌ Offline') }}</td>
+                <td>
+                    <button onclick="sendRequest('start', '{{ ip }}')">Start</button>
+                    <button onclick="sendRequest('stop', '{{ ip }}')">Stop</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
